@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TRADING J</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="hero-copy">
+        <p class="eyebrow">Trading Journal</p>
+        <h1 class="brand-title">
+          <span class="brand-main">TRADING</span>
+          <span class="brand-mark">J</span>
+        </h1>
+        <p class="headline">Journal operativo para medir disciplina, riesgo y resultados diarios.</p>
+        <p class="signature">BY DWARDS_PROGRAMMING</p>
+      </div>
+      <div class="market-visual" aria-hidden="true">
+        <div class="chart-grid"></div>
+        <span class="candle up c1"></span>
+        <span class="candle down c2"></span>
+        <span class="candle up c3"></span>
+        <span class="candle up c4"></span>
+        <span class="candle down c5"></span>
+        <span class="candle up c6"></span>
+        <span class="price-line"></span>
+        <div class="ticker">
+          <span>NASDAQ</span>
+          <strong>+1.84%</strong>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="newTradeButton" type="button">Nuevo trade</button>
+        <button class="ghost" id="compactModeButton" type="button" aria-pressed="false">Compacto</button>
+        <button class="ghost" id="importButton" type="button">Importar CSV</button>
+        <button class="ghost" id="importReportButton" type="button">Probar PDF directo</button>
+        <button class="primary" id="downloadButton" type="button">Descargar Excel</button>
+        <input id="importFile" type="file" accept=".csv,text/csv" hidden />
+        <input id="reportFile" type="file" accept=".pdf,application/pdf" hidden />
+      </div>
+    </header>
+
+    <main class="layout">
+      <details class="panel form-panel journal-subpart" id="journalPanel">
+        <summary class="journal-toggle">
+          <span>Bitacora operativa</span>
+          <small>Opcional: registra setups, capturas, checklist y notas.</small>
+        </summary>
+        <div class="journal-content">
+        <div class="section-heading">
+          <div>
+            <h2 id="formTitle">Registro diario</h2>
+            <p class="edit-status" id="editStatus">Nuevo registro</p>
+          </div>
+          <button class="ghost small" id="clearButton" type="button">Limpiar</button>
+        </div>
+
+        <form id="journalForm">
+          <input id="entryId" type="hidden" />
+
+          <div class="grid hidden" aria-hidden="true">
+            <label>
+              Fecha
+              <input id="date" name="date" type="date" required />
+            </label>
+            <label>
+              Sesion
+              <select id="session" name="session">
+                <option value="New York">New York</option>
+                <option value="London">London</option>
+                <option value="Asia">Asia</option>
+                <option value="Pre-market">Pre-market</option>
+              </select>
+            </label>
+            <label>
+              Activo
+              <input id="asset" name="asset" type="text" placeholder="EURUSD, NAS100, BTC..." />
+            </label>
+            <label>
+              Plan cumplido
+              <select id="planFollowed" name="planFollowed">
+                <option value="Si">Si</option>
+                <option value="Parcial">Parcial</option>
+                <option value="No">No</option>
+              </select>
+            </label>
+          </div>
+
+          <fieldset class="plan-checklist hidden" aria-hidden="true">
+            <legend>Plan checklist</legend>
+            <label class="check-option">
+              <input id="checkDirection" name="checkDirection" type="checkbox" />
+              Direccion
+            </label>
+            <label class="check-option">
+              <input id="checkLiquiditySweep" name="checkLiquiditySweep" type="checkbox" />
+              Liquidity Sweep
+            </label>
+            <label class="check-option">
+              <input id="checkDisplacement" name="checkDisplacement" type="checkbox" />
+              Displacement
+            </label>
+            <label class="check-option">
+              <input id="checkIfvgLowTf" name="checkIfvgLowTf" type="checkbox" />
+              IFVG low TF
+            </label>
+          </fieldset>
+
+          <section class="image-analysis" aria-labelledby="imageAnalysisTitle">
+            <div class="analysis-head">
+              <div>
+                <h3 id="imageAnalysisTitle">Capturas del diario</h3>
+                <p id="imageStatus">Sube hasta 3 capturas del dia. El analisis viene del JSON de ChatGPT.</p>
+              </div>
+              <div class="analysis-actions">
+                <button class="ghost small" id="imageButton" type="button">Subir 3 capturas</button>
+                <button class="ghost small hidden" id="removeImageButton" type="button">Quitar</button>
+              </div>
+            </div>
+            <input id="chartImage" type="file" accept="image/*,.pdf,application/pdf" multiple hidden />
+            <div class="daily-captures" id="dailyCaptures">
+              <article class="capture-card" data-capture-slot="0">
+                <div class="capture-card-head">
+                  <div>
+                    <strong>Captura 1</strong>
+                    <span data-capture-name>Sin archivo</span>
+                  </div>
+                  <div class="capture-card-actions">
+                    <button class="ghost tiny" data-capture-upload="0" type="button">Subir</button>
+                    <button class="ghost tiny hidden" data-capture-remove="0" type="button">Quitar</button>
+                  </div>
+                </div>
+                <div class="capture-preview hidden" data-capture-preview-wrap>
+                  <img data-capture-preview alt="Captura 1 del diario" />
+                  <iframe data-capture-pdf title="PDF captura 1"></iframe>
+                </div>
+                <div class="capture-metrics hidden" aria-hidden="true">
+                  <label>
+                    Volumen
+                    <input class="capture-input" data-capture-field="volume" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Entradas
+                    <input class="capture-input" data-capture-field="entries" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Parciales
+                    <input class="capture-input" data-capture-field="partials" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Resultado
+                    <select class="capture-input" data-capture-field="result">
+                      <option value="">No claro</option>
+                      <option value="Positivo">Positivo</option>
+                      <option value="Negativo">Negativo</option>
+                      <option value="Break even">Break even</option>
+                    </select>
+                  </label>
+                  <label>
+                    Desarrollo
+                    <select class="capture-input" data-capture-field="trend">
+                      <option value="">No claro</option>
+                      <option value="Impulso limpio">Impulso limpio</option>
+                      <option value="Retroceso">Retroceso</option>
+                      <option value="Consolidacion">Consolidacion</option>
+                      <option value="Reversal">Reversal</option>
+                    </select>
+                  </label>
+                  <label>
+                    Grado
+                    <select class="capture-input" data-capture-field="grade">
+                      <option value="">Sin grado</option>
+                      <option value="A+">A+</option>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="hidden" aria-hidden="true">
+                  Nota de captura
+                  <textarea class="capture-input" data-capture-field="notes" rows="2" placeholder="Parciales, flechas, contexto, como se desarrollo el trade..."></textarea>
+                </label>
+              </article>
+
+              <article class="capture-card" data-capture-slot="1">
+                <div class="capture-card-head">
+                  <div>
+                    <strong>Captura 2</strong>
+                    <span data-capture-name>Sin archivo</span>
+                  </div>
+                  <div class="capture-card-actions">
+                    <button class="ghost tiny" data-capture-upload="1" type="button">Subir</button>
+                    <button class="ghost tiny hidden" data-capture-remove="1" type="button">Quitar</button>
+                  </div>
+                </div>
+                <div class="capture-preview hidden" data-capture-preview-wrap>
+                  <img data-capture-preview alt="Captura 2 del diario" />
+                  <iframe data-capture-pdf title="PDF captura 2"></iframe>
+                </div>
+                <div class="capture-metrics hidden" aria-hidden="true">
+                  <label>
+                    Volumen
+                    <input class="capture-input" data-capture-field="volume" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Entradas
+                    <input class="capture-input" data-capture-field="entries" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Parciales
+                    <input class="capture-input" data-capture-field="partials" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Resultado
+                    <select class="capture-input" data-capture-field="result">
+                      <option value="">No claro</option>
+                      <option value="Positivo">Positivo</option>
+                      <option value="Negativo">Negativo</option>
+                      <option value="Break even">Break even</option>
+                    </select>
+                  </label>
+                  <label>
+                    Desarrollo
+                    <select class="capture-input" data-capture-field="trend">
+                      <option value="">No claro</option>
+                      <option value="Impulso limpio">Impulso limpio</option>
+                      <option value="Retroceso">Retroceso</option>
+                      <option value="Consolidacion">Consolidacion</option>
+                      <option value="Reversal">Reversal</option>
+                    </select>
+                  </label>
+                  <label>
+                    Grado
+                    <select class="capture-input" data-capture-field="grade">
+                      <option value="">Sin grado</option>
+                      <option value="A+">A+</option>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="hidden" aria-hidden="true">
+                  Nota de captura
+                  <textarea class="capture-input" data-capture-field="notes" rows="2" placeholder="Parciales, flechas, contexto, como se desarrollo el trade..."></textarea>
+                </label>
+              </article>
+
+              <article class="capture-card" data-capture-slot="2">
+                <div class="capture-card-head">
+                  <div>
+                    <strong>Captura final</strong>
+                    <span data-capture-name>Sin archivo</span>
+                  </div>
+                  <div class="capture-card-actions">
+                    <button class="ghost tiny" data-capture-upload="2" type="button">Subir</button>
+                    <button class="ghost tiny hidden" data-capture-remove="2" type="button">Quitar</button>
+                  </div>
+                </div>
+                <div class="capture-preview hidden" data-capture-preview-wrap>
+                  <img data-capture-preview alt="Captura final del diario" />
+                  <iframe data-capture-pdf title="PDF captura final"></iframe>
+                </div>
+                <div class="capture-metrics hidden" aria-hidden="true">
+                  <label>
+                    Volumen
+                    <input class="capture-input" data-capture-field="volume" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Entradas
+                    <input class="capture-input" data-capture-field="entries" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Parciales
+                    <input class="capture-input" data-capture-field="partials" type="number" min="0" step="1" value="0" />
+                  </label>
+                  <label>
+                    Resultado
+                    <select class="capture-input" data-capture-field="result">
+                      <option value="">No claro</option>
+                      <option value="Positivo">Positivo</option>
+                      <option value="Negativo">Negativo</option>
+                      <option value="Break even">Break even</option>
+                    </select>
+                  </label>
+                  <label>
+                    Desarrollo
+                    <select class="capture-input" data-capture-field="trend">
+                      <option value="">No claro</option>
+                      <option value="Impulso limpio">Impulso limpio</option>
+                      <option value="Retroceso">Retroceso</option>
+                      <option value="Consolidacion">Consolidacion</option>
+                      <option value="Reversal">Reversal</option>
+                    </select>
+                  </label>
+                  <label>
+                    Grado
+                    <select class="capture-input" data-capture-field="grade">
+                      <option value="">Sin grado</option>
+                      <option value="A+">A+</option>
+                      <option value="A">A</option>
+                      <option value="B">B</option>
+                      <option value="C">C</option>
+                    </select>
+                  </label>
+                </div>
+                <label class="hidden" aria-hidden="true">
+                  Nota de captura
+                  <textarea class="capture-input" data-capture-field="notes" rows="2" placeholder="Parciales, flechas, contexto, como se desarrollo el trade..."></textarea>
+                </label>
+              </article>
+            </div>
+            <div class="grid analysis-grid hidden" aria-hidden="true">
+              <label>
+                Direccion vista
+                <select id="analysisDirection">
+                  <option value="">No claro</option>
+                  <option value="Alcista">Alcista</option>
+                  <option value="Bajista">Bajista</option>
+                  <option value="Rango">Rango</option>
+                </select>
+              </label>
+              <label>
+                Sweep
+                <select id="analysisSweep">
+                  <option value="">No claro</option>
+                  <option value="Altos">Altos</option>
+                  <option value="Bajos">Bajos</option>
+                  <option value="Ambos">Ambos</option>
+                </select>
+              </label>
+              <label>
+                Displacement
+                <select id="analysisDisplacement">
+                  <option value="">No claro</option>
+                  <option value="Fuerte">Fuerte</option>
+                  <option value="Medio">Medio</option>
+                  <option value="Debil">Debil</option>
+                </select>
+              </label>
+              <label>
+                IFVG low TF
+                <select id="analysisIfvg">
+                  <option value="">No claro</option>
+                  <option value="Confirmado">Confirmado</option>
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="No valido">No valido</option>
+                </select>
+              </label>
+            </div>
+            <button class="ghost wide hidden" id="applyAnalysisButton" type="button" aria-hidden="true">Aplicar capturas al registro</button>
+            <div class="capture-ai-panel">
+              <div class="analysis-head">
+                <div>
+                  <h3>Analizar capturas con ChatGPT</h3>
+                  <p>Sube las mismas capturas a ChatGPT, pega aqui el JSON y la web lo guarda junto con las imagenes.</p>
+                </div>
+                <button class="ghost small" id="copyCapturePromptButton" type="button">Copiar prompt</button>
+              </div>
+              <textarea id="captureAiInput" rows="7" placeholder="Pega aqui el JSON que te devuelva ChatGPT..."></textarea>
+              <button class="primary wide" id="applyCaptureAiButton" type="button">Aplicar y guardar registro</button>
+              <p id="captureAiStatus">Primero sube las capturas aqui para guardarlas con el registro. Luego copia el prompt y usalo en ChatGPT junto con esas imagenes.</p>
+            </div>
+          </section>
+
+          <div class="grid metrics hidden" aria-hidden="true">
+            <label>
+              Trades
+              <input id="trades" name="trades" type="number" min="0" step="1" value="0" />
+            </label>
+            <label>
+              Ganadoras
+              <input id="wins" name="wins" type="number" min="0" step="1" value="0" />
+            </label>
+            <label>
+              Perdedoras
+              <input id="losses" name="losses" type="number" min="0" step="1" value="0" />
+            </label>
+            <label>
+              Resultado $
+              <input id="pnl" name="pnl" type="number" step="0.01" value="0" />
+            </label>
+            <label>
+              Riesgo %
+              <input id="risk" name="risk" type="number" min="0" step="0.01" value="0" />
+            </label>
+            <label>
+              R:R promedio
+              <input id="rr" name="rr" type="number" step="0.01" value="0" />
+            </label>
+          </div>
+
+          <label class="hidden" aria-hidden="true">
+            Emocion dominante
+            <select id="emotion" name="emotion">
+              <option value="Neutral">Neutral</option>
+              <option value="Enfoque">Enfoque</option>
+              <option value="Ansiedad">Ansiedad</option>
+              <option value="Confianza">Confianza</option>
+              <option value="Frustracion">Frustracion</option>
+              <option value="Impaciencia">Impaciencia</option>
+            </select>
+          </label>
+
+          <label class="hidden" aria-hidden="true">
+            Notas
+            <textarea id="notes" name="notes" rows="4" placeholder="Que funciono, que mejorar, setups, errores..."></textarea>
+          </label>
+
+          <div class="submit-row">
+            <button class="primary wide hidden" id="submitButton" type="submit" aria-hidden="true">Guardar registro</button>
+            <button class="ghost wide hidden" id="cancelEditButton" type="button">Cancelar edicion</button>
+          </div>
+        </form>
+        </div>
+      </details>
+
+      <section class="summary" aria-label="Resumen">
+        <article>
+          <span>Registros</span>
+          <strong id="totalEntries">0</strong>
+        </article>
+        <article>
+          <span>P&L total</span>
+          <strong id="totalPnl">$0.00</strong>
+        </article>
+        <article>
+          <span>Win rate</span>
+          <strong id="winRate">0%</strong>
+        </article>
+        <article>
+          <span>Riesgo prom.</span>
+          <strong id="avgRisk">0%</strong>
+        </article>
+      </section>
+
+      <section class="daily-summary" aria-label="Resumen diario">
+        <article>
+          <span id="dailySummaryLabel">Dia</span>
+          <strong id="dailyPnl">$0.00</strong>
+          <small id="dailyDetail">Sin registros</small>
+        </article>
+        <article>
+          <span>Riesgo usado</span>
+          <strong id="dailyRisk">--</strong>
+          <small id="dailyRiskStatus">Sin dato</small>
+        </article>
+        <article>
+          <span>Mejor setup</span>
+          <strong id="dailyBestSetup">--</strong>
+          <small id="dailyBestSetupDetail">Sin capturas</small>
+        </article>
+      </section>
+
+      <section class="report-section" aria-labelledby="reportTitle">
+        <div class="section-heading">
+          <div>
+            <h2 id="reportTitle">Reporte</h2>
+            <p id="importedReportStatus">Metricas calculadas desde el historial.</p>
+          </div>
+          <button class="ghost small hidden" id="clearReportButton" type="button">Quitar analisis</button>
+          <label class="balance-field">
+            Capital inicial
+            <input id="startingBalance" type="number" min="0" step="0.01" placeholder="10000" />
+          </label>
+        </div>
+
+        <div class="report-grid">
+          <article>
+            <span>Rendimiento</span>
+            <strong id="returnRate">--</strong>
+            <small id="returnValue">$0.00</small>
+          </article>
+          <article>
+            <span>Drawdown max.</span>
+            <strong id="maxDrawdown">--</strong>
+            <small id="maxDrawdownValue">$0.00</small>
+          </article>
+          <article>
+            <span>Profit factor</span>
+            <strong id="profitFactor">0.00</strong>
+            <small id="grossProfitLoss">$0.00 / $0.00</small>
+          </article>
+          <article>
+            <span>Trades cerrados</span>
+            <strong id="closedTrades">0</strong>
+            <small id="closedWinRate">0% win rate</small>
+          </article>
+          <article>
+            <span>Prom. trade</span>
+            <strong id="avgTrade">$0.00</strong>
+            <small id="expectancy">Expectativa $0.00</small>
+          </article>
+          <article>
+            <span>R:R real</span>
+            <strong id="realRr">0.00</strong>
+            <small id="avgWinLoss">$0.00 / $0.00</small>
+          </article>
+          <article>
+            <span>Checklist prom.</span>
+            <strong id="planChecklistRate">0%</strong>
+            <small id="planChecklistDetail">0/4 por entrada</small>
+          </article>
+          <article>
+            <span>Setups A+</span>
+            <strong id="aPlusSetups">0</strong>
+            <small id="aPlusPnl">$0.00 P&L</small>
+          </article>
+        </div>
+
+        <div class="discipline-grid" aria-label="Dashboard de disciplina">
+          <article>
+            <span>Plan cumplido</span>
+            <strong id="disciplinePlanRate">0%</strong>
+            <small id="disciplinePlanDetail">0 de 0 registros</small>
+          </article>
+          <article>
+            <span>Riesgo OK</span>
+            <strong id="disciplineRiskOk">--</strong>
+            <small id="disciplineRiskDetail">Sin datos de riesgo</small>
+          </article>
+          <article>
+            <span>Mejor sesion</span>
+            <strong id="disciplineBestSession">--</strong>
+            <small id="disciplineBestSessionDetail">$0.00 P&L</small>
+          </article>
+        </div>
+
+        <div class="ai-report-panel">
+          <div class="analysis-head">
+            <div>
+              <h3>Actualizar dashboard con IA</h3>
+              <p>Camino recomendado para reportes PDF o capturas que la app no puede leer sola.</p>
+            </div>
+            <button class="ghost small" id="copyAiPromptButton" type="button">Copiar prompt</button>
+          </div>
+          <ol class="ai-steps">
+            <li>Copia el prompt.</li>
+            <li>Sube tu PDF o captura a ChatGPT junto con ese prompt.</li>
+            <li>Pega aqui el JSON que te devuelva y actualiza el dashboard.</li>
+          </ol>
+          <div class="grid report-period-grid">
+            <label>
+              Tipo de reporte
+              <select id="reportPeriodType">
+                <option value="Semanal">Semanal</option>
+                <option value="Mensual">Mensual</option>
+              </select>
+            </label>
+            <label>
+              Inicio
+              <input id="reportStartDate" type="date" />
+            </label>
+            <label>
+              Fin
+              <input id="reportEndDate" type="date" />
+            </label>
+          </div>
+          <textarea
+            id="aiReportInput"
+            rows="6"
+            placeholder='Pega JSON aqui. Ejemplo: {"pnl":-66.70,"trades":9,"wins":3,"losses":6,"winRate":33.33,"grossProfit":111.79,"grossLoss":178.49,"profitFactor":0.63}'
+          ></textarea>
+          <button class="primary wide" id="applyAiReportButton" type="button">Actualizar dashboard</button>
+        </div>
+      </section>
+
+      <details class="panel chart-panel" id="reportChartPanel">
+        <summary class="journal-toggle">
+          <span>Grafica de reportes</span>
+          <small>Evolucion de P&L acumulado por reporte guardado.</small>
+        </summary>
+        <div class="chart-content">
+          <div class="report-chart" aria-label="Grafica de P&L por reporte">
+            <svg id="reportChart" role="img" aria-labelledby="reportChartTitle"></svg>
+            <p class="empty visible" id="reportChartEmpty">Guarda al menos dos reportes para ver la grafica.</p>
+          </div>
+        </div>
+      </details>
+
+      <section class="panel report-history-panel" aria-labelledby="reportHistoryTitle">
+        <div class="section-heading">
+          <div>
+            <h2 id="reportHistoryTitle">Registro de reportes</h2>
+            <p>Resumenes mensuales guardados desde el analisis IA o PDF directo.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="report-history-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Periodo</th>
+                <th>Reporte</th>
+                <th>P&L</th>
+                <th>Trades</th>
+                <th>Win</th>
+                <th>PF</th>
+                <th>DD</th>
+                <th>Origen</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="reportHistoryBody"></tbody>
+          </table>
+          <p class="empty" id="reportHistoryEmpty">Aun no hay reportes guardados.</p>
+        </div>
+      </section>
+
+      <section class="panel table-panel" aria-labelledby="historyTitle">
+        <div class="section-heading">
+          <div>
+            <h2 id="historyTitle">Historial</h2>
+            <p>Los datos se guardan en este navegador y puedes exportarlos cuando quieras.</p>
+          </div>
+          <label class="search">
+            Buscar
+            <input id="searchInput" type="search" placeholder="Fecha, activo, sesion..." />
+          </label>
+          <div class="history-filters">
+            <label>
+              Periodo
+              <select id="periodFilter">
+                <option value="all">Todo</option>
+                <option value="today">Hoy</option>
+                <option value="week">Esta semana</option>
+                <option value="month">Este mes</option>
+              </select>
+            </label>
+            <label>
+              Sesion
+              <select id="sessionFilter">
+                <option value="all">Todas</option>
+                <option value="New York">New York</option>
+                <option value="London">London</option>
+                <option value="Asia">Asia</option>
+                <option value="Pre-market">Pre-market</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Sesion</th>
+                <th>Activo</th>
+                <th>Trades</th>
+                <th>W/L</th>
+                <th>P&L</th>
+                <th>Riesgo</th>
+                <th>Plan</th>
+                <th>Checklist</th>
+                <th>Capturas</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="entriesBody"></tbody>
+          </table>
+          <p class="empty" id="emptyState">Aun no hay registros. Guarda tu primer dia de trading.</p>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal" id="tradeEditDialog">
+      <form method="dialog" class="modal-card" id="quickEditForm">
+        <div class="modal-head">
+          <div>
+            <h2>Editar trade</h2>
+            <p id="quickEditMeta">Registro</p>
+          </div>
+          <button class="ghost tiny" value="cancel" type="submit">Cerrar</button>
+        </div>
+        <input id="quickEditId" type="hidden" />
+        <div class="grid modal-grid">
+          <label>
+            Resultado $
+            <input id="quickEditPnl" type="number" step="0.01" />
+          </label>
+          <label>
+            Riesgo %
+            <input id="quickEditRisk" type="number" min="0" step="0.01" />
+          </label>
+          <label>
+            R:R
+            <input id="quickEditRr" type="number" min="0" step="0.01" />
+          </label>
+          <label>
+            Ganadoras
+            <input id="quickEditWins" type="number" min="0" step="1" />
+          </label>
+          <label>
+            Perdedoras
+            <input id="quickEditLosses" type="number" min="0" step="1" />
+          </label>
+        </div>
+        <label>
+          Notas
+          <textarea id="quickEditNotes" rows="4"></textarea>
+        </label>
+        <button class="primary wide" id="saveQuickEditButton" value="default" type="button">Guardar cambios</button>
+      </form>
+    </dialog>
+
+    <dialog class="modal" id="capturesDialog">
+      <div class="modal-card capture-viewer">
+        <div class="modal-head">
+          <div>
+            <h2>Capturas del trade</h2>
+            <p id="captureViewerMeta">Registro</p>
+          </div>
+          <button class="ghost tiny" id="closeCapturesButton" type="button">Cerrar</button>
+        </div>
+        <div class="capture-viewer-grid" id="captureViewerGrid"></div>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
